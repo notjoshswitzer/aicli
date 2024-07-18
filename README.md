@@ -7,6 +7,6 @@ To install, simply run **install.sh** within the `/aicli/` directory. This will 
 **- OS detection
 - Command extraction
 - Useful prompts (extract-wisdom, explain-code, optimize-code, refactor-code, etc.)
-- Supports [Ollama](https://ollama.com/)
+- Supports [Ollama](https://github.com/ollama/ollama)
 - Repeat previous response**
 
