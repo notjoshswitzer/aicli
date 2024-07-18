@@ -9,6 +9,8 @@ import subprocess
 import platform
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.live import Live
+from rich.panel import Panel
 
 # Constants
 OLLAMA_URL = 'http://localhost:11434/'  # Update this if your Ollama URL is different
@@ -43,21 +45,25 @@ def stream_api_response(chat_history):
         "stream": True,
     }
     console.log('[bold black]' + DEFAULT_LLM)
-    spinnerList = ['arc', 'dots12', 'growHorizontal']
-    with console.status("[bold yellow] Thinking...", spinner=random.choice(spinnerList)) as status:
-        with requests.post(url, stream=True, json=payload) as response:
-            response.raise_for_status()
-            hist_output = ''
+    spinner_list = ['arc']
+    hist_output = ''
+    
+    with requests.post(url, stream=True, json=payload) as response:
+        response.raise_for_status()
+        with Live(console=console, refresh_per_second=4) as live:
             for line in response.iter_lines():
                 if line:
                     try:
                         char = json.loads(line.decode("utf-8"))['message']['content']
                         hist_output += char
-                    except:
+                        markdown = Markdown(hist_output)
+                        live.update(Panel(markdown))
+                    except json.JSONDecodeError:
                         pass
-            markdown = Markdown(hist_output)
-            console.print(markdown)
-            console.log("[bold black]Done")
+                    except KeyError:
+                        pass
+
+    console.log("[bold black]")
     return hist_output
 
 
