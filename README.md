@@ -5,11 +5,12 @@
 
 To install, simply run **install.sh** within the `/aicli/` directory. This will add *AI* to your `/bin/` folder so the utility can be accessed system wide.
 
-- Markdown output
+- Supports [Ollama](https://github.com/ollama/ollama)
+- Supports [OpenAI](https://platform.openai.com/api-keys) _(soon)_
+- **Streamed markdown** output
 - OS detection
 - Command extraction
 - Useful prompts
-- Supports [Ollama](https://github.com/ollama/ollama)
 - Repeat previous response
 
 _Note: Output seems to be best formated when using a LLM oriented for coding._
