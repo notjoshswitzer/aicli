@@ -16,6 +16,25 @@ DEFAULT_LLM = 'deepseek-coder-v2:16b'  #'llama3:70b'  # Update this to your defa
 
 console = Console()
 
+def get_os():
+    OS = False
+    system = platform.system()
+    if system == "Linux":
+        try:
+            with open("/etc/os-release") as f:
+                lines = f.readlines()
+            os_info = dict(line.strip().split("=", 1) for line in lines if "=" in line)
+            OS = "{0} {1}".format(os_info.get('NAME', 'Unknown'), os_info.get('VERSION', ''))
+        except FileNotFoundError:
+            pass
+    elif system == "Windows":
+        OS = "Windows {0}".format(platform.win32_ver()[0])
+    elif system == "Darwin":
+        OS = "macOS {0}".format(platform.mac_ver()[0])
+    else:
+        OS = system
+    return OS
+
 def stream_api_response(chat_history):
     url = OLLAMA_URL + 'api/chat'
     payload = {
@@ -61,7 +80,6 @@ def main():
     parser.add_argument("--design-patterns", action="store_true", help="Suggest applicable design patterns")
 
     args = parser.parse_args()
-
     # Check if there's piped input
     if not sys.stdin.isatty():
         piped_input = sys.stdin.read().strip()
@@ -70,7 +88,7 @@ def main():
 
     # Construct the query
     if piped_input:
-        query = f"\n\nContent:\n{piped_input}\n\n\n" + " ".join(args.query)
+        query = f"\n\nContent:\n{piped_input}\n\n\n\n" + " ".join(args.query)
     else:
         query = " ".join(args.query)
 
@@ -79,22 +97,8 @@ def main():
     nowdate = now.strftime("%Y/%m/%d %H:%M")
     system_message = "The current time is {0}. ".format(nowdate)
 
-    OS = False
-    system = platform.system()
-    if system == "Linux":
-        try:
-            with open("/etc/os-release") as f:
-                lines = f.readlines()
-            os_info = dict(line.strip().split("=", 1) for line in lines if "=" in line)
-            OS = "{0} {1}".format(os_info.get('NAME', 'Unknown'), os_info.get('VERSION', ''))
-        except FileNotFoundError:
-            pass
-    elif system == "Windows":
-        OS = "Windows {0}".format(platform.win32_ver()[0])
-    elif system == "Darwin":
-        OS = "macOS {0}".format(platform.mac_ver()[0])
-    else:
-        OS = system
+    # Add user OS information to the prompt
+    OS = get_os()
     if OS:
         system_message += "The user operating system is {0}. ".format(OS.replace('"', ''))
     
@@ -127,16 +131,18 @@ def main():
         {"role": "user", "content": query}
     ]
 
-    # Call the API
+    # Print previous response
     if args.l:
         with open('.aicli_last', 'r') as f:
             output = f.read()
             markdown = Markdown(output)
             console.print(markdown)
+    # Call the Ollama API
     else:
         output = stream_api_response(chat_history)
         with open('.aicli_last', 'w') as f:
             f.write(''.join(output))
+
     if args.e:
         outputs = output.split('```')
         code = []
@@ -151,12 +157,10 @@ def main():
         else:
             code = output.split()
         if len(code) > 0 and len(code) < 3:
-            color = '\033[38;5;88m'
             for c in code:
-                choice = input("{0}[ (\033[31;0mE{0})xecute | (\033[31;0mD{0})escribe | (\033[31;0mC{0})ancel ]\033[31;239m:\033[31;0m ".format(color)).upper()
+                choice = input("{0}[ (\033[31;0mE{0})xecute | (\033[31;0mD{0})escribe | (\033[31;0mC{0})ancel ]\033[31;239m:\033[31;0m ".format('\033[38;5;88m')).upper()
                 if choice == 'E':
                     result = subprocess.run(c.split(), capture_output=True, text=True)
-
                     # Print the output and error (if any)
                     print("Output:", result.stdout)
                     if result.stderr:
