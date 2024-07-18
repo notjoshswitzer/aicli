@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.markdown import Markdown
 
 # Constants
-OLLAMA_URL = 'https://ai.one.gy/'  # Update this if your Ollama URL is different
+OLLAMA_URL = 'http://localhost:11434/'  # Update this if your Ollama URL is different
 DEFAULT_LLM = 'deepseek-coder-v2:16b'  #'llama3:70b'  # Update this to your default model
 
 console = Console()
