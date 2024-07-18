@@ -1,7 +1,12 @@
 # aicli
 **Simple python interface between Ollama's API and your CLI**
+![image](https://github.com/user-attachments/assets/12d3b333-1b2f-4243-8ec7-93d4caf333a7)
 
 To install, simply run **install.sh** within the `/aicli/` directory. This will add *AI* to your `/bin/` folder so the utility can be accessed system wide.
 
-![image](https://github.com/user-attachments/assets/c389864c-42d8-469f-925a-db5a6751956a)
-![image](https://github.com/user-attachments/assets/5e632b33-f4b9-49de-97d0-53d744c15cb4)
+**- OS detection
+- Command extraction
+- Useful prompts (extract-wisdom, explain-code, optimize-code, refactor-code, etc.)
+- Supports [Ollama](https://ollama.com/)
+- Repeat previous response**
+
