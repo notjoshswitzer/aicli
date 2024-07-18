@@ -4,9 +4,9 @@
 
 To install, simply run **install.sh** within the `/aicli/` directory. This will add *AI* to your `/bin/` folder so the utility can be accessed system wide.
 
-**- OS detection
+- OS detection
 - Command extraction
 - Useful prompts (extract-wisdom, explain-code, optimize-code, refactor-code, etc.)
 - Supports [Ollama](https://github.com/ollama/ollama)
-- Repeat previous response**
+- Repeat previous response
 
