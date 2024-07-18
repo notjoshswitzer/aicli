@@ -50,8 +50,11 @@ def stream_api_response(chat_history):
             hist_output = ''
             for line in response.iter_lines():
                 if line:
-                    char = json.loads(line.decode("utf-8"))['message']['content']
-                    hist_output += char
+                    try:
+                        char = json.loads(line.decode("utf-8"))['message']['content']
+                        hist_output += char
+                    except:
+                        pass
             markdown = Markdown(hist_output)
             console.print(markdown)
             console.log("[bold black]Done")
@@ -156,9 +159,10 @@ def main():
                 code.append(outputs[3])
         else:
             code = output.split()
+        color = '\033[38;5;88m'
         if len(code) > 0 and len(code) < 3:
             for c in code:
-                choice = input("{0}[ (\033[31;0mE{0})xecute | (\033[31;0mD{0})escribe | (\033[31;0mC{0})ancel ]\033[31;239m:\033[31;0m ".format('\033[38;5;88m')).upper()
+                choice = input("{0}[ (\033[31;0mE{0})xecute | (\033[31;0mD{0})escribe | (\033[31;0mC{0})ancel ]\033[31;239m:\033[31;0m ".format(color)).upper()
                 if choice == 'E':
                     result = subprocess.run(c.split(), capture_output=True, text=True)
                     # Print the output and error (if any)
