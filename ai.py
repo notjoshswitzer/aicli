@@ -1,17 +1,14 @@
-import requests
-import json
-import sys
 import os
+import sys
+import json
 import argparse
 import datetime
-import random
-import subprocess
+import requests
 import platform
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.live import Live
 from rich.panel import Panel
-
 import config # Edit the config.py file
 
 console = Console()
