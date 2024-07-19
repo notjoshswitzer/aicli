@@ -12,9 +12,7 @@ from rich.markdown import Markdown
 from rich.live import Live
 from rich.panel import Panel
 
-# Constants
-OLLAMA_URL = 'http://localhost:11434/'  # Update this if your Ollama URL is different
-DEFAULT_LLM = 'deepseek-coder-v2:16b'  #'llama3:70b'  # Update this to your default model
+import config # Edit the config.py file
 
 console = Console()
 
@@ -37,24 +35,50 @@ def get_os():
         OS = system
     return OS
 
-def stream_api_response(chat_history):
-    url = OLLAMA_URL + 'api/chat'
+def stream_api_response(chat_history, args):
     payload = {
-        "model": DEFAULT_LLM,
         "messages": chat_history,
         "stream": True,
+        "model": False
     }
-    console.log('[bold black]' + DEFAULT_LLM)
-    spinner_list = ['arc']
+
     hist_output = ''
     
-    with requests.post(url, stream=True, json=payload) as response:
-        response.raise_for_status()
+    if args.G:
+        payload['model'] = config.OAI_LLM
+        headers = {"Authorization": "Bearer " + config.OAI_KEY}
+        response = requests.post("https://api.openai.com/v1/chat/completions", stream=True, json=payload, headers=headers)
+    else:
+        payload['model'] = config.OLLAMA_LLM
+        response = requests.post(config.OLLAMA_URL + 'api/chat', stream=True, json=payload)
+
+    if not args.x:
+        console.log('[bold black]' + payload['model'])
+
+    response.raise_for_status()
+    if args.x:
+        for line in response.iter_lines():
+            if line:
+                try:
+                    if args.G:
+                        char = json.loads(line.decode("utf-8")[6:])['choices'][0]['delta']['content']
+                    else:
+                        char = json.loads(line.decode("utf-8"))['message']['content']
+                    hist_output += char
+                    print(char, end='')
+                except json.JSONDecodeError:
+                    pass
+                except KeyError:
+                    pass
+    else:
         with Live(console=console, refresh_per_second=4) as live:
             for line in response.iter_lines():
                 if line:
                     try:
-                        char = json.loads(line.decode("utf-8"))['message']['content']
+                        if args.G:
+                            char = json.loads(line.decode("utf-8")[6:])['choices'][0]['delta']['content']
+                        else:
+                            char = json.loads(line.decode("utf-8"))['message']['content']
                         hist_output += char
                         markdown = Markdown(hist_output)
                         live.update(Panel(markdown))
@@ -63,7 +87,9 @@ def stream_api_response(chat_history):
                     except KeyError:
                         pass
 
-    console.log("[bold black]")
+    if not args.x:
+        console.log('[bold black]done')
+
     return hist_output
 
 
@@ -71,9 +97,10 @@ def main():
     parser = argparse.ArgumentParser(description="AI Assistant using Ollama API")
     parser.add_argument("query", nargs="*", help="Query for the AI")
     
+    parser.add_argument("-G", action="store_true", help="Use OpenAI (GPT)")
     # Functional
-    parser.add_argument("-l", action="store_true", help="Print the last LLM response")
-    parser.add_argument("-e", action="store_true", help="Generate command to complete a task")
+    parser.add_argument("-l", action="store_true", help="Print the last output")
+    parser.add_argument("-x", action="store_true", help="Remove formatting from output")
 
     # Basic prompts
     parser.add_argument("--extract-wisdom", action="store_true", help="Summarize and extract key insights")
@@ -86,7 +113,6 @@ def main():
     parser.add_argument("--architect", action="store_true", help="Propose architecture for the described problem")
     parser.add_argument("--refactor", action="store_true", help="Suggest refactoring strategys for the provided code")
     parser.add_argument("--security-audit", action="store_true", help="Perform a security audit on the provided code")
-    parser.add_argument("--design-patterns", action="store_true", help="Suggest applicable design patterns")
 
     args = parser.parse_args()
     # Check if there's piped input
@@ -100,6 +126,8 @@ def main():
         query = f"\n\nContent:\n{piped_input}\n\n\n\n" + " ".join(args.query)
     else:
         query = " ".join(args.query)
+    if piped_input and len(query) == 0:
+        query = "Give a breif description of the provided content. "
 
     # Prepare the chat history
     now = datetime.datetime.now()
@@ -127,13 +155,6 @@ def main():
         system_message += "Your task is to suggest a comprehensive refactoring strategy for the provided code, improving its structure and maintainability. "
     elif args.security_audit:
         system_message += "Your task is to perform a thorough security audit on the provided code, identifying potential vulnerabilities and suggesting mitigations. "
-    elif args.design_patterns:
-        system_message += "Your task is to suggest applicable design patterns for the given problem, explaining how they would be implemented and their benefits. "
-    if not args.e:
-        system_message += "Do not repeat the system message. Ensure your answers are well thought out and use the best technical practices when answering questions. "
-        system_message += "If your response to the user includes code or code snippets, ensure the starting code wrapper ``` is followed with the name of the programming language. "
-    else:
-        system_message += """You are designed to act as a command line expert. Your primary function is to understand user descriptions of desired commands and output the exact Linux command that can be run on the terminal without any additional text or explanation.\nConstraints: You should strictly output Linux commands without any explanatory text, preambles, or follow-up messages. It must ensure the commands are syntactically correct and applicable to the described task.\nGuidelines: You should be capable of interpreting a wide range of descriptions related to file management, system administration, networking, and software management among other Linux command line tasks. It should focus on providing the most direct and efficient command solution to the user's request.\nClarification: You should be biased toward making a response based on the intended behavior, filling in any missing details. If the description is too vague or broad, it should opt for the most commonly used or straightforward command related to the request. Each seperate command should be on a new line.\nPersonalization: You maintain a neutral tone, focusing solely on the accuracy and applicability of the Linux commands provided. """
 
     chat_history = [
         {"role": "system", "content": system_message},
@@ -144,15 +165,18 @@ def main():
     if args.l:
         with open('.aicli_last', 'r') as f:
             output = f.read()
-            markdown = Markdown(output)
-            console.print(markdown)
+            if args.x:
+                print(output)
+            else:
+                markdown = Markdown(output)
+                console.print(markdown)
     # Call the Ollama API
     else:
-        output = stream_api_response(chat_history)
+        output = stream_api_response(chat_history, args)
         with open('.aicli_last', 'w') as f:
             f.write(''.join(output))
 
-    if args.e:
+    if args.x:
         outputs = output.split('```')
         code = []
         if len(outputs) == 3:
@@ -180,7 +204,7 @@ def main():
                         {"role": "system", "content": 'Your task is to explain the provided code in detail, breaking down its functionality and purpose. Do not explain the basic fundamentals or simple functions, such as printing. '},
                         {"role": "user", "content": '\n\n\n'.join(code)}
                     ]
-                    stream_api_response(chat_history)
+                    stream_api_response(chat_history, args)
                     choice = input("{0}[ (\033[31;0mE{0})xecute | (\033[31;0mC{0})ancel ]\033[31;239m:\033[31;0m ".format(color)).upper()
                     if choice == 'E':
                         os.system(c)
