@@ -127,18 +127,19 @@ def main():
     else:
         query = " ".join(args.query)
     if piped_input and len(query) == 0:
-        query = "Give a breif description of the provided content. "
+        query = "Give a short description of the provided content. "
 
-    # Prepare the chat history
+    # Add date & time to system prompt
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y/%m/%d %H:%M")
     system_message = "The current time is {0}. ".format(nowdate)
 
-    # Add user OS information to the prompt
+    # Add OS details to the prompt
     OS = get_os()
     if OS:
         system_message += "The user operating system is {0}. ".format(OS.replace('"', ''))
     
+    # Engineering prompts to curate output
     if args.extract_wisdom:
         system_message += "Your task is to extract wisdom, summarize, and provide key insights from the content. Do not leave out any important facts or details that may influence the understanding. Organizing information in bullet points is preffered. "
     elif args.explain_code:
@@ -156,6 +157,7 @@ def main():
     elif args.security_audit:
         system_message += "Your task is to perform a thorough security audit on the provided code, identifying potential vulnerabilities and suggesting mitigations. "
 
+    # Define chat history list
     chat_history = [
         {"role": "system", "content": system_message},
         {"role": "user", "content": query}
@@ -170,48 +172,11 @@ def main():
             else:
                 markdown = Markdown(output)
                 console.print(markdown)
-    # Call the Ollama API
+    # Call the selected API
     else:
         output = stream_api_response(chat_history, args)
         with open('.aicli_last', 'w') as f:
             f.write(''.join(output))
-
-    if args.x:
-        outputs = output.split('```')
-        code = []
-        if len(outputs) == 3:
-            if '\n' in outputs[1]:
-                code.append(outputs[1])
-        elif len(outputs) == 5:
-            if '\n' in outputs[1]:
-                code.append(outputs[1])
-            if '\n' in outputs[3]:
-                code.append(outputs[3])
-        else:
-            code = output.split()
-        color = '\033[38;5;88m'
-        if len(code) > 0 and len(code) < 3:
-            for c in code:
-                choice = input("{0}[ (\033[31;0mE{0})xecute | (\033[31;0mD{0})escribe | (\033[31;0mC{0})ancel ]\033[31;239m:\033[31;0m ".format(color)).upper()
-                if choice == 'E':
-                    result = subprocess.run(c.split(), capture_output=True, text=True)
-                    # Print the output and error (if any)
-                    print("Output:", result.stdout)
-                    if result.stderr:
-                        print("Error:", result.stderr)
-                elif choice == 'D':
-                    chat_history = [
-                        {"role": "system", "content": 'Your task is to explain the provided code in detail, breaking down its functionality and purpose. Do not explain the basic fundamentals or simple functions, such as printing. '},
-                        {"role": "user", "content": '\n\n\n'.join(code)}
-                    ]
-                    stream_api_response(chat_history, args)
-                    choice = input("{0}[ (\033[31;0mE{0})xecute | (\033[31;0mC{0})ancel ]\033[31;239m:\033[31;0m ".format(color)).upper()
-                    if choice == 'E':
-                        os.system(c)
-                    else:
-                        pass
-                else:
-                    pass
 
 if __name__ == "__main__":
     main()
