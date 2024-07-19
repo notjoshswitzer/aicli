@@ -17,5 +17,4 @@ To install, simply run **install.sh** within the `/aicli/` directory. This will 
 _Note: Output seems to be best formated when using a LLM oriented for coding._
 
 ![image](https://github.com/user-attachments/assets/7749aaef-26d1-4c1c-a005-20f9985f2489)
-![image](https://github.com/user-attachments/assets/9ababe9e-7c46-4573-8b79-47b453e6c2d7)
-
+![image](https://github.com/user-attachments/assets/52006234-81be-4b49-8481-f52eb8a23079)
