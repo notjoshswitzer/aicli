@@ -15,4 +15,4 @@ To install, simply run **install.sh** within the `/aicli/` directory. This will 
 - **Repeat last response**
 - **Config file**
 
-![image](https://github.com/user-attachments/assets/52006234-81be-4b49-8481-f52eb8a23079)
+![image](https://github.com/user-attachments/assets/0368ee93-a785-4719-8f54-1c5829281016)
