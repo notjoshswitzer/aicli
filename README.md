@@ -6,10 +6,10 @@ _Note: Output seems to be best formated when using a LLM oriented for coding._
 
 To install, simply run **install.sh** within the `/aicli/` directory. This will add *AI* to your `/bin/` folder so the utility can be accessed system wide.
 
-- **Supports [Ollama](https://github.com/ollama/ollama)**					- **Output text without markdown (FLAG: -x)**
+- **Supports [Ollama](https://github.com/ollama/ollama)**			- **Output text without markdown (FLAG: -x)**
 - **Supports [OpenAI](https://platform.openai.com/api-keys)**			- **Repeat last output (FLAG: -l )**_(Previous response)_
-- **Streamed markdown output**																		- **Command execution (FLAG: -E )** _(Previous response)_
-- **Engineering prompts**																					- **Code extraction (FLAG: -C )**   _(Previous response)_
+- **Streamed markdown output**							- **Command execution (FLAG: -E )** _(Previous response)_
+- **Engineering prompts**							- **Code extraction (FLAG: -C )**   _(Previous response)_
 - **OS detection**
 - **Config file**
 
