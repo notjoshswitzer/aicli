@@ -9,10 +9,13 @@ To install, simply run **install.sh** within the `/aicli/` directory. This will 
 - **Supports [Ollama](https://github.com/ollama/ollama)**
 - **Supports [OpenAI](https://platform.openai.com/api-keys)**
 - **Streamed markdown output**
+- **Engineering prompts**
 - **OS detection**
-- **Command extraction** _(soon)_
-- **Useful prompts**
-- **Repeat last response**
 - **Config file**
+
+- **Output text without markdown (FLAG: -x)**
+- **Repeat previous response (FLAG: -l )**
+- **Command execution (FLAG: -E )**
+- **Code extraction (FLAG: -C )**
 
 ![image](https://github.com/user-attachments/assets/61e08c6b-a830-4fb3-acfb-d4eb34dcd9a4)
