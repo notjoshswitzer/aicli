@@ -8,3 +8,6 @@ OLLAMA_LLM = 'llama3.1:8b'                                           # https://o
 
 # Default LLM
 DEFAULT_LLM = 'ollama'                                               # ollama or oai (-G and -O flag overide this default)
+
+# RSS feeds
+NEWS = 'https://www.wired.com/feed/category/science/latest/rss'
