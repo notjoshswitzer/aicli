@@ -4,7 +4,7 @@ OAI_LLM = 'gpt-4o-mini'                                              # https://p
 
 # Ollama config
 OLLAMA_URL = 'http://localhost:11434/'                               # Ollama API endpoint (Ensure your Ollama service is public)
-OLLAMA_LLM = 'deepseek-coder-v2:16b'                                 # https://ollama.com/library
+OLLAMA_LLM = 'llama3.1:8b'                                           # https://ollama.com/library
 
 # Default LLM
 DEFAULT_LLM = 'ollama'                                               # ollama or oai (-G and -O flag overide this default)
