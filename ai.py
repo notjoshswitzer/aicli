@@ -62,7 +62,7 @@ def stream_api_response(chat_history, args):
         payload['model'] = config.OLLAMA_LLM
         response = requests.post(config.OLLAMA_URL + 'api/chat', stream=True, json=payload)
     else:
-        print("Invalid LLM")
+        print("Invalid LLM\naoi     OR     ollama")
         exit()
 
     # Print time/LLM
@@ -144,6 +144,7 @@ def main():
     # ARG Functions
     parser.add_argument("-E", action="store_true", help="Extract command(s) from last output")
     parser.add_argument("-C", action="store_true", help="Extract code from last output")
+    parser.add_argument("-N", action="store_true", help="Show the latest news")
 
     # ARG Formatting
     parser.add_argument("-l", action="store_true", help="Print the last output")
@@ -192,6 +193,13 @@ def main():
     # Construct the query
     if piped_input:
         query = f"<content>{piped_input}</content>\n\n" + " ".join(args.query)
+    elif args.N:
+        try:
+            resp = requests.get(config.NEWS).text
+        except:
+            print("Failed to fetch news feed...")
+            exit()
+        query = f"<news>{resp}</news>\n\nSummarize the news articles provided. Only reply with the summarized version of each news item. Reply with beautiful markdown formatting and make sure to include any related links."
     else:
         query = " ".join(args.query)
 
@@ -229,6 +237,8 @@ def main():
         system_message += ["Your task is to suggest a comprehensive refactoring strategy for the provided code, improving its structure and maintainability."]
     elif args.security_audit:
         system_message += ["Your task is to perform a thorough security audit on the provided code, identifying potential vulnerabilities and suggesting mitigations."]
+    elif args.N:
+        system_message += ["Your task is summarize the provided news feed. Seperate the news in segments, like International News, National News, Science and Tech, Cyber Security, and so on. Do not leave out any important details. Ensure you summarize each item. Do not include advertisements."]
 
     # Define chat history list
     chat_history = [
